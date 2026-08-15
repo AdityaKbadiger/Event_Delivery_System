@@ -5,7 +5,7 @@ repository VARCHAR(255)
 );
 CREATE TABLE events(
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    event_id VARCHAR(255) NOT NULL,
+    event_id VARCHAR(255) NOT NULL UNIQUE,
     event_type VARCHAR(255) NOT NULL,
     destination_url VARCHAR(1000) NOT NULL,
     payload VARCHAR(5000) NOT NULL
