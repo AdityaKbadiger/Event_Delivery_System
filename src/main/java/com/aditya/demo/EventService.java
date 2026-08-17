@@ -3,6 +3,7 @@ package com.aditya.demo;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.dao.DuplicateKeyException;
 
 import java.util.List;
 
@@ -12,15 +13,22 @@ public class EventService {
     public EventService(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
-    public String createEvent(EventRequest event){
-        String sql ="""
+    public EventCreationResult createEvent(EventRequest event){
+        try {
+            String sql ="""
                 INSERT INTO events
                 (event_id, event_type, destination_url, payload)
                 VALUES (?, ?, ?, ?)
                 """;
-        jdbcTemplate.update(sql,event.getEventId(),event.getEventType(),event.getDestinationUrl(),event.getPayload()
-        );
-        return "Event added successfully";
+            jdbcTemplate.update(sql,event.getEventId(),event.getEventType(),event.getDestinationUrl(),event.getPayload()
+            );
+            return EventCreationResult.CREATED;
+
+        }
+        catch (DuplicateKeyException e){
+            return EventCreationResult.ALREADY_EXISTS;
+        }
+
     }
     public List<Event> getAllEvents(){
         String sql= """
