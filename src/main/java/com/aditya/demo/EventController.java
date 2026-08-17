@@ -13,11 +13,13 @@ import java.util.List;
 @org.springframework.stereotype.Service
 public class EventController {
     private final EventService eventService;
+    private final DestinationService destinationService;
 
 
 
-    public EventController(EventService eventService) {
+    public EventController(EventService eventService, DestinationService destinationService) {
         this.eventService = eventService;
+        this.destinationService=destinationService;
 
     }
 
@@ -31,15 +33,28 @@ public class EventController {
 
              return ResponseEntity.status(201).body(status);
 
+
+
          }
 
          return ResponseEntity.status(200).body(status);
 
 
     }
+
     @GetMapping ("/getevents")
     public List<Event> getAllEvents(){
         return eventService.getAllEvents();
+    }
+    @PostMapping("deliver-test")
+    public String deliverTest(){
+
+        EventRequest event= new EventRequest();
+        event.setDestinationUrl("http://localhost:8080/destination");//if we add/does-not-exist or other thing we can find failure point that is the event is not deliverd
+        event.setPayload("{\"message\":\"hello from delivery service\"}");
+        destinationService.deliver(event);
+
+        return "Delivered";
     }
 
 }

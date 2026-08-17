@@ -1,9 +1,12 @@
 package com.aditya.demo;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 
@@ -30,6 +33,7 @@ public class EventService {
         }
 
     }
+
     public List<Event> getAllEvents(){
         String sql= """
                 SELECT id, event_Id, event_Type, destination_Url, payload
