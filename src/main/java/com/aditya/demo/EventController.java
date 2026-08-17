@@ -25,18 +25,16 @@ public class EventController {
     public ResponseEntity<EventStatus> createEvent(@Valid @RequestBody EventRequest event){
         EventCreationResult result= eventService.createEvent(event);
         EventStatus status= new EventStatus();
+        status.setId(event.getEventId());
+        status.setStatus(result);
          if(result==EventCreationResult.CREATED){
-             ResponseEntity<EventStatus> body;
-             status.setId(event.getEventId());
-             status.setStatus("CREATED");
-             body = ResponseEntity.status(201).body(status);
-             return body;
+
+             return ResponseEntity.status(201).body(status);
+
          }
-         status.setId(event.getEventId());
-         status.setStatus("ALREADY_EXISTS");
-         ResponseEntity<EventStatus> body;
-         body=ResponseEntity.status(200).body(status);
-         return body;
+
+         return ResponseEntity.status(200).body(status);
+
 
     }
     @GetMapping ("/getevents")
