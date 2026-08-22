@@ -20,10 +20,10 @@ public class EventService {
         try {
             String sql ="""
                 INSERT INTO events
-                (event_id, event_type, destination_url, payload)
-                VALUES (?, ?, ?, ?)
+                (event_id, event_type, destination_url, payload,status)
+                VALUES (?, ?, ?, ?,?)
                 """;
-            jdbcTemplate.update(sql,event.getEventId(),event.getEventType(),event.getDestinationUrl(),event.getPayload()
+            jdbcTemplate.update(sql,event.getEventId(),event.getEventType(),event.getDestinationUrl(),event.getPayload(),EventCreationResult.PENDING.name()
             );
             return EventCreationResult.CREATED;
 

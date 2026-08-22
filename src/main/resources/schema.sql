@@ -8,5 +8,6 @@ CREATE TABLE events(
     event_id VARCHAR(255) NOT NULL UNIQUE,
     event_type VARCHAR(255) NOT NULL,
     destination_url VARCHAR(1000) NOT NULL,
-    payload VARCHAR(5000) NOT NULL
-)
+    payload VARCHAR(5000) NOT NULL,
+    status VARCHAR(50) NOT NULL
+);
