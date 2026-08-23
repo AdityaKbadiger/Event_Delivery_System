@@ -26,7 +26,7 @@ public class EventWorker implements Runnable {
             try{
                 System.out.println("WORKER WAITING FOR EVENT ");
                 EventRequest event= eventQueue.dequeue();
-                System.out.println("WORKER RECIVED");
+                System.out.println(Thread.currentThread().getName()+"Recieved"+event.getEventId());
                 destinationService.deliver(event);
                 System.out.println("WORKER DELIVERD");
             }catch (InterruptedException e){
