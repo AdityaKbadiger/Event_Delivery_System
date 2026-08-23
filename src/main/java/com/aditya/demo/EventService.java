@@ -12,9 +12,11 @@ import java.util.List;
 
 @Service
 public class EventService {
+    private final EventQueue eventQueue;
     private final JdbcTemplate jdbcTemplate;
-    public EventService(JdbcTemplate jdbcTemplate) {
+    public EventService(JdbcTemplate jdbcTemplate, EventQueue eventQueue) {
         this.jdbcTemplate = jdbcTemplate;
+        this.eventQueue=eventQueue;
     }
     public EventCreationResult createEvent(EventRequest event){
         try {
@@ -25,6 +27,7 @@ public class EventService {
                 """;
             jdbcTemplate.update(sql,event.getEventId(),event.getEventType(),event.getDestinationUrl(),event.getPayload(),EventCreationResult.PENDING.name()
             );
+            eventQueue.enqueue(event);
             return EventCreationResult.CREATED;
 
         }

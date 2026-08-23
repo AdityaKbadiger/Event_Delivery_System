@@ -12,11 +12,13 @@ import java.util.List;
 @RestController
 @org.springframework.stereotype.Service
 public class EventController {
+    private final EventQueue eventQueue;
     private final EventService eventService;
     private final DestinationService destinationService;
-    public EventController(EventService eventService, DestinationService destinationService) {
+    public EventController(EventService eventService, DestinationService destinationService, EventQueue eventQueue) {
         this.eventService = eventService;
         this.destinationService=destinationService;
+        this.eventQueue=eventQueue;
 
     }
 
@@ -44,9 +46,9 @@ public class EventController {
         destinationService.deliver(event);
         return "Delivered";
     }
-    @PostMapping("queue-test")
+    @PostMapping("/queue-test")
     public String queueTest(){
-        EventQueue eventQueue= new EventQueue();
+        //ventQueue eventQueue= new EventQueue();
         EventRequest event = new EventRequest();
         event.setEventId("queue_test_1");
         event.setEventType("test");
@@ -54,6 +56,20 @@ public class EventController {
         event.setPayload("{\\\"message\\\":\\\"hello\\\"}");
         eventQueue.enqueue(event);
         return "Event added to queue";
+
+    }
+    @GetMapping("/queue-test")
+    public String dequeueTest(){
+        try {
+            EventRequest event= eventQueue.dequeue();
+            if(event==null){
+                return "The queue is empty";
+            }
+            return event.getEventId();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
 
     }
 
