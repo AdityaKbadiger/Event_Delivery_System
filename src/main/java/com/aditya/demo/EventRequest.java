@@ -10,6 +10,7 @@ public class EventRequest {
     private String destinationUrl;
     @NotBlank
     private String payload;
+    private int retrycount;
     public String getEventId(){
         return eventId;
     }
@@ -35,7 +36,12 @@ public class EventRequest {
     public void setPayload(String payload){
         this.payload=payload;
     }
-
+    public void setRetrycount(int retrycount){
+        this.retrycount=retrycount;
+    }
+    public int getRetrycount(){
+        return retrycount;
+    }
 
 
 

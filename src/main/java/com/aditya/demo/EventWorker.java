@@ -1,38 +1,77 @@
 package com.aditya.demo;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import org.springframework.stereotype.Component;
 
 import javax.swing.plaf.synth.SynthOptionPaneUI;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
 @Component
 public class EventWorker implements Runnable {
     private final EventQueue eventQueue;
+    private final EventService eventService;
     private final DestinationService destinationService;
-    public EventWorker(EventQueue eventQueue, DestinationService destinationService){
+    private final ExecutorService executor= Executors.newFixedThreadPool(3);
+    public EventWorker(EventQueue eventQueue, DestinationService destinationService, EventService eventService){
         this.eventQueue=eventQueue;
         this.destinationService=destinationService;
+        this.eventService=eventService;
     }
     @PostConstruct
     public void start(){
-        System.out.println("START METHOD CALLED ");
-        Thread workThread= new Thread(this);
-        workThread.start();
-        System.out.println("STARTING WORKER THREAD");
+        System.out.println("3 worker threads started");
+        for (int i=0;i<3;i++){
+            executor.submit(this);
+        }
+
     }
     @Override
     public void run(){
         System.out.println("WORKER RUN METHOD STARTED");
-        while(true){
+        while(!Thread.currentThread().isInterrupted()){
             try{
-                System.out.println("WORKER WAITING FOR EVENT ");
+
                 EventRequest event= eventQueue.dequeue();
-                System.out.println(Thread.currentThread().getName()+"Recieved"+event.getEventId());
-                destinationService.deliver(event);
-                System.out.println("WORKER DELIVERD");
+                destinationService.updateStatus(event.getEventId(), EventCreationResult.PROCESSSING);
+
+                System.out.println(Thread.currentThread().getName()+"Received"+event.getEventId());
+                try {
+                    destinationService.deliver(event);
+                    System.out.println(Thread.currentThread().getName()+"Delivered"+event.getEventId());
+                    destinationService.updateStatus(event.getEventId(), EventCreationResult.DELIVERED);
+                } catch (Exception e) {
+                    eventService.incrementRetryCount(event);
+                    destinationService.updateStatus(event.getEventId(), EventCreationResult.PENDING);
+                    //eventQueue.enqueue(event);
+                    //getretrycount which includes sql query and current event s id can be used
+                    eventService.nextAttemptAt(event);
+
+                    // i have to enqueue after scheduling
+                    throw new RuntimeException(e);
+                }
+
+
             }catch (InterruptedException e){
                 Thread.currentThread().interrupt();
                 break;
+            }catch (Exception e){
+                System.out.println("Delivery error"+Thread.currentThread()+" "+e.getMessage());
             }
+        }
+    }
+    @PreDestroy
+    public void stop(){
+        System.out.println("Stopping the worker threads ");
+        executor.shutdownNow();
+        try{
+            if (!executor.awaitTermination(3, TimeUnit.SECONDS)){
+                System.out.println("the worker does not shutdown in 3 seconds or given time");
+            }
+        }catch (InterruptedException e){
+            Thread.currentThread().interrupt();
         }
     }
 }

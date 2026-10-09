@@ -14,9 +14,11 @@ import java.util.List;
 public class EventService {
     private final EventQueue eventQueue;
     private final JdbcTemplate jdbcTemplate;
-    public EventService(JdbcTemplate jdbcTemplate, EventQueue eventQueue) {
+    private final SchedulerLogic schedulerLogic;
+    public EventService(JdbcTemplate jdbcTemplate, EventQueue eventQueue, SchedulerLogic schedulerLogic) {
         this.jdbcTemplate = jdbcTemplate;
         this.eventQueue=eventQueue;
+        this.schedulerLogic=schedulerLogic;
     }
     public EventCreationResult createEvent(EventRequest event){
         try {
@@ -28,7 +30,9 @@ public class EventService {
             jdbcTemplate.update(sql,event.getEventId(),event.getEventType(),event.getDestinationUrl(),event.getPayload(),EventCreationResult.PENDING.name()
             );
             eventQueue.enqueue(event);
+
             return EventCreationResult.CREATED;
+
 
         }
         catch (DuplicateKeyException e){
@@ -60,4 +64,32 @@ public class EventService {
         });
         return events;
     }
+    public void incrementRetryCount(EventRequest event){
+        String sqlretry = """
+                UPDATE events
+                SET retry_count=retry_count+1
+                WHERE event_id =?
+                """;
+        jdbcTemplate.update(sqlretry,event.getEventId());
+
+    }
+    public void nextAttemptAt(EventRequest event){
+        int newtime= (int) schedulerLogic.time(event.getRetrycount());
+
+        String sqlnext= """
+                UPDATE events
+                SET next_attempt_at=created_at+
+                """
+    }
+    public int getRetryCount(EventRequest event){
+        String sqlcount= """
+                SELECT retry_count
+                FROM events
+                WHERE event_id=?
+                """;
+        int time =jdbcTemplate.queryForObject(sqlcount,Integer.class,event.getEventId());
+        return time;
+    }
+
 }
+

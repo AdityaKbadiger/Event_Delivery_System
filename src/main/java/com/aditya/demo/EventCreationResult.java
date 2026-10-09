@@ -4,5 +4,7 @@ public enum EventCreationResult {
     CREATED,
     ALREADY_EXISTS,
     PENDING,
-    DELIVERED;
+    PROCESSSING,
+    DELIVERED,
+    FAILED;
 }

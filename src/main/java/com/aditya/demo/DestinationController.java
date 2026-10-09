@@ -1,4 +1,5 @@
 package com.aditya.demo;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 @RestController
 public class DestinationController {
@@ -7,7 +8,8 @@ public class DestinationController {
         System.out.println("DESTINATION RECIEVED");
         Thread.sleep(20000);
         System.out.println("The destionation recieved"+ payload);
-        return "Destination recieved event";
+
+        return "Destination received event";
     }
 
 }

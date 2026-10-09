@@ -9,5 +9,8 @@ CREATE TABLE events(
     event_type VARCHAR(255) NOT NULL,
     destination_url VARCHAR(1000) NOT NULL,
     payload VARCHAR(5000) NOT NULL,
-    status VARCHAR(50) NOT NULL
+    status VARCHAR(50) NOT NULL,
+    retry_count INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    next_attempt_at TIMESTAMP
 );
